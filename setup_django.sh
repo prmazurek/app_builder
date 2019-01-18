@@ -1,5 +1,9 @@
 #!/bin/bash
 
+function setup_circleci_project {
+	echo "curl -X POST https://circleci.com/api/v1.1/project/github/${GITHUB_USERNAME}/$1/follow?circle-token=${CIRCLECI_SECRET}"
+}
+
 python_version=3.7
 
 echo """Welcome sir or madam...
@@ -32,5 +36,7 @@ cp -r update_settings ./${project_path}/${project_name}/
 docker-compose -f ${project_path}/docker-compose.yml run web bash ${project_name}/update_settings/update_settings.sh
 
 rm -r ./${project_path}/${project_name}/update_settings
+
+# setup_circleci_project ${project_name}
 
 docker-compose -f ${project_path}/docker-compose.yml up
