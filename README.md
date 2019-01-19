@@ -14,7 +14,10 @@ Instructions on how to generate auth tokens for github and circleci can be found
 - https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/
 - https://circleci.com/docs/2.0/managing-api-tokens/
 
-`./setup_django.sh` Will create a python 3.7 container with django 2.1.5 
+`./setup_django.sh` Will create a python 3.7 container with django 2.1.5
+
 `./setup_django.sh -i` Allows you to customize the building process. If you would like for example django 1.8 on python 2.7 for whatever reason, it will set it up for you.
+
 `./setup_django.sh -v` Verbosity mode.
+
 `./setup_django.sh -h` Help
