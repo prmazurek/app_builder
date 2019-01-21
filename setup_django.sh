@@ -78,20 +78,16 @@ function create_django_file_structure {
 	mkdir projects/${main_dir}
 	project_path=projects/${main_dir}
 
-	dockerfile=`cat scaffold/Dockerfile`
-	dockerfile=${dockerfile/<python_version>/$python_version}
-	dockerfile=${dockerfile/<project_name>/$project_name}
-	echo "$dockerfile" > "${project_path}/Dockerfile"
+	sed 's/<python_version>/'"$python_version"'/g' scaffold/Dockerfile | sed 's/<project_name>/'"$project_name"'/g' > ${project_path}/Dockerfile
 
-	config=`cat scaffold/config.env`
-	config=${config/<project_name>/$project_name}
-	echo "$config" > "${project_path}/config.env"
+	sed 's/<project_name>/'"$project_name"'/g' scaffold/config.env > ${project_path}/config.env
 
 	cp scaffold/docker-compose.yml ${project_path}/docker-compose.yml
 
-	requirements=`cat scaffold/requirements.txt`
-	requirements=${requirements/<django_version>/"Django==$django_version"}
-	echo "$requirements" > "${project_path}/requirements.txt"
+	sed 's/<django_version>/Django=='"$django_version"'/g' scaffold/requirements.txt > ${project_path}/requirements.txt
+
+	mkdir ${project_path}/.circleci
+	sed 's/<python_version>/'"$python_version"'/g' scaffold/.circleci/config.yml | sed 's/<project_name>/'"$project_name"'/g' > ${project_path}/.circleci/config.yml
 }
 
 function create_django_project {
@@ -105,17 +101,17 @@ function create_django_project {
 }
 
 function call_github_api {
-	echo "curl -i -H "Authorization: token ${GITHUB_SECRET}" -d '{"name": "${project_name}", "auto_init": false, "private": true}' https://api.github.com/user/repos"
+	curl -i -H "Authorization: token ${GITHUB_SECRET}" -d "{\"name\": \"${project_name}\", \"auto_init\": false, \"private\": true}" https://api.github.com/user/repos
 }
 
 function commit_and_push {
-	# cd ${project_path}
-	# git init
-	# git add .
-	# git commit -m"Automatic initial commit"
-	# git remote add origin git@github.com:${GITHUB_USERNAME}/${project_name}.git
-	# cd workdir
-	echo "pushing..."
+	cd ${project_path}
+	git init
+	git add .
+	git commit -m"Automatic initial commit"
+	git remote add origin git@github.com:${GITHUB_USERNAME}/${project_name}.git
+	git push https://${GITHUB_USERNAME}:${GITHUB_SECRET}@github.com/${GITHUB_USERNAME}/${project_name}.git
+	cd ${workdir}
 }
 
 function setup_github_repo {
@@ -124,7 +120,7 @@ function setup_github_repo {
 }
 
 function setup_circleci_project {
-	echo "curl -X POST https://circleci.com/api/v1.1/project/github/${GITHUB_USERNAME}/${project_name}/follow?circle-token=${CIRCLECI_SECRET}"
+	curl -X POST https://circleci.com/api/v1.1/project/github/${GITHUB_USERNAME}/${project_name}/follow?circle-token=${CIRCLECI_SECRET}
 }
 
 function start_containers {

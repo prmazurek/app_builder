@@ -1,0 +1,40 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/<project_name>
+    docker:
+      - image: circleci/python:<python_version>
+        environment:
+          PIPENV_VENV_IN_PROJECT: true
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: postgres
+          POSTGRES_USER: root
+      - image: circleci/postgres:11.1
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: postgres
+    steps:
+      - checkout
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python<python_version>/site-packages
+      - restore_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - run:
+          command: |
+            sudo pip install pipenv
+            pipenv install
+      - save_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python<python_version>/site-packages"
+      - run:
+          command: |
+            pipenv run python manage.py test
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+          destination: tr1
