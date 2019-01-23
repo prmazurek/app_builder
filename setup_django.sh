@@ -100,7 +100,7 @@ function create_django_project {
 
 	cp -r update_settings ./${project_path}/${project_name}/
 
-	docker-compose -f ${project_path}/docker-compose.yml run web bash ${project_name}/update_settings/update_settings.sh
+	docker-compose -f ${project_path}/docker-compose.yml run web bash ${project_name}/update_settings/update_settings.sh ${1:-update_django_settings}
 
 	rm -r ./${project_path}/${project_name}/update_settings
 }
@@ -114,7 +114,7 @@ function create_django_cms_project {
 
 	cp -r update_settings ./${project_path}/${project_name}/
 
-	docker-compose -f ${project_path}/docker-compose.yml run web bash ${project_name}/update_settings/update_settings.sh
+	docker-compose -f ${project_path}/docker-compose.yml run web bash ${project_name}/update_settings/update_settings.sh ${1:-update_django_settings}
 
 	rm -r ${project_path}/${project_name}/update_settings
 }
@@ -164,6 +164,27 @@ function setup_django_cms {
 	create_django_cms_project
 }
 
+function setup_django_rest_framework {
+	set_required_django_variables
+	create_django_file_structure
+
+	sed 's/<django_version>/Django=='"$django_version"'/g' scaffold/requirements.django.txt > ${project_path}/requirements.txt
+	cat scaffold/requirements.drf.txt >> ${project_path}/requirements.txt
+
+	create_django_project update_drf_settings
+}
+
+function setup_django_cms_and_drf {
+	set_required_django_cms_variables
+
+	create_django_file_structure
+
+	create_django_cms_project update_drf_for_cms_settings
+
+	cat scaffold/requirements.drf.txt >> ${project_path}/requirements.txt
+
+}
+
 function comming_up_soon {
 	echo "This option is not available yet, sorry."
 }
@@ -182,8 +203,8 @@ read -p """What technology would you like me to use?
 	case $technology_stack in
 		1) setup_django;;
 		2) setup_django_cms;;
-		3) comming_up_soon;;
-		4) comming_up_soon;;
+		3) setup_django_rest_framework;;
+		4) setup_django_cms_and_drf;;
 		5) comming_up_soon;;
 		6) comming_up_soon;;
 		7) comming_up_soon;;
@@ -206,7 +227,7 @@ function main {
 
 	[ $create_circleci ] && setup_circleci_project
 
-	start_containers
+	# start_containers
 }
 
 function usage {
