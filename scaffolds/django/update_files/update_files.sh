@@ -2,28 +2,28 @@ function prepare_variables {
 	settings_path="/app/${PROJECT_NAME}/settings.py"
 	urls_path="/app/${PROJECT_NAME}/urls.py"
 	newline_substitue=$(openssl rand -hex 16)
-	sed ':a;N;$!ba;s/\n/'"$newline_substitue"'/g' ${settings_path} > update_settings.tmp
+	sed ':a;N;$!ba;s/\n/'"$newline_substitue"'/g' ${settings_path} > settings.tmp
 }
 
 function update_databases {
-	databases=$(sed ':a;N;$!ba;s/\n/'"$newline_substitue"'/g' "/app/${PROJECT_NAME}/update_settings/databases.py")
-	sed -i "s/DATABASES\s=\s{[^{]*{[^}]*}[^}]*}/${databases}/g" update_settings.tmp
+	databases=$(sed ':a;N;$!ba;s/\n/'"$newline_substitue"'/g' "/app/${PROJECT_NAME}/update_files/databases.py")
+	sed -i "s/DATABASES\s=\s{[^{]*{[^}]*}[^}]*}/${databases}/g" settings.tmp
 }
 
 function update_installed_apps_drf {
-	installed_apps=$(egrep -o "INSTALLED_APPS\s=\s\[[a-zA-Z0-9\s '\.,]+]" update_settings.tmp | sed "s/\]$/    'rest_framework',$newline_substitue\]/")
-	sed -i "s/INSTALLED_APPS\s=\s\[[a-zA-Z0-9\s '\.,]*\]/$installed_apps/" update_settings.tmp
+	installed_apps=$(egrep -o "INSTALLED_APPS\s=\s\[[a-zA-Z0-9\s '\.,]+]" settings.tmp | sed "s/\]$/    'rest_framework',$newline_substitue\]/")
+	sed -i "s/INSTALLED_APPS\s=\s\[[a-zA-Z0-9\s '\.,]*\]/$installed_apps/" settings.tmp
 }
 
 function update_installed_apps_drf_and_cms {
-	installed_apps=`egrep -o "INSTALLED_APPS\s=\s\([a-zA-Z0-9\s ,\'\._,]+\)" update_settings.tmp | sed "s/$newline_substitue)/,$newline_substitue)/" | sed "s/)$/    'rest_framework',$newline_substitue)/"`
-	sed -i "s/INSTALLED_APPS\s=\s([a-zA-Z0-9\s \'\._,]*)/$installed_apps/" update_settings.tmp
+	installed_apps=`egrep -o "INSTALLED_APPS\s=\s\([a-zA-Z0-9\s ,\'\._,]+\)" settings.tmp | sed "s/$newline_substitue)/,$newline_substitue)/" | sed "s/)$/    'rest_framework',$newline_substitue)/"`
+	sed -i "s/INSTALLED_APPS\s=\s([a-zA-Z0-9\s \'\._,]*)/$installed_apps/" settings.tmp
 }
 
 function switch_settings {
-	sed -i 's/'"$newline_substitue"'/\n/g' update_settings.tmp
+	sed -i 's/'"$newline_substitue"'/\n/g' settings.tmp
 	rm ${settings_path}
-	mv update_settings.tmp ${settings_path}
+	mv settings.tmp ${settings_path}
 }
 
 function update_django_settings {
