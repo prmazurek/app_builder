@@ -67,7 +67,14 @@ function create_django_file_structure {
 
 	sed 's/<project_name>/'"$project_name"'/g' scaffolds/django/config.env > ${project_path}/config.env
 
-	cp scaffolds/django/docker-compose.yml ${project_path}/docker-compose.yml
+	sed 's/<project_name>/'"$project_name"'/g' scaffolds/django/docker-compose.yml > ${project_path}/docker-compose.yml
+
+	sed 's/<project_name>/'"$project_name"'/g' scaffolds/django/Makefile > ${project_path}/Makefile
+
+	sed 's/<project_name>/'"$project_name"'/g' scaffolds/django/README.md > ${project_path}/README.md
+
+	cp scaffolds/django/.gitignore ${project_path}/.gitignore
+	cp -r scaffolds/django/nginx/ ${project_path}/nginx
 
 	mkdir ${project_path}/.circleci
 	sed 's/<python_version>/'"$python_version"'/g' scaffolds/django/.circleci/config.yml | sed 's/<project_name>/'"$project_name"'/g' > ${project_path}/.circleci/config.yml
